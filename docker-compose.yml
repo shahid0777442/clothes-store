@@ -1,0 +1,12 @@
+services:
+  mongo:
+    image: mongo:7
+    volumes: [mongo-data:/data/db]
+  app:
+    build: ./app
+    environment:
+      MONGO_URL: mongodb://mongo:27017/clothes
+    ports: ["3000:3000"]
+    depends_on: [mongo]
+volumes:
+  mongo-data:

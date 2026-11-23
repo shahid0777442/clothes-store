@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clothes-app
+  namespace: clothes-store
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: clothes-app }
+  template:
+    metadata:
+      labels: { app: clothes-app }
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/YOUR_GITHUB_USERNAME/clothes-store:latest
+          imagePullPolicy: Always
+          ports: [{ containerPort: 3000 }]
+          env:
+            - name: MONGO_URL
+              value: mongodb://mongo:27017/clothes
+          readinessProbe:
+            httpGet: { path: /health, port: 3000 }
+            initialDelaySeconds: 5
+          livenessProbe:
+            httpGet: { path: /health, port: 3000 }
+            initialDelaySeconds: 15
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits: { cpu: 300m, memory: 256Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clothes-app
+  namespace: clothes-store
+spec:
+  selector: { app: clothes-app }
+  ports: [{ port: 80, targetPort: 3000 }]
